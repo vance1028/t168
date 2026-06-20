@@ -1,0 +1,22 @@
+{
+  "name": "elder-canteen",
+  "version": "1.0.0",
+  "description": "社区长者助餐运营管理平台 - 纯后端 REST API（功能迭代题基础工程）",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "seed": "node src/seed.js",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.11.5"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0"
+  }
+}

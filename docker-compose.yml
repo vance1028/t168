@@ -1,0 +1,34 @@
+services:
+  db:
+    image: mysql:8.0
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: eldercare
+      MYSQL_USER: care
+      MYSQL_PASSWORD: carepass
+    ports:
+      - "13377:3306"
+    volumes:
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: care
+      DB_PASSWORD: carepass
+      DB_NAME: eldercare
+      PORT: 5090
+      JWT_SECRET: elder-canteen-dev-secret
+    ports:
+      - "5090:5090"
