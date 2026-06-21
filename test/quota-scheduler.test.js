@@ -5,14 +5,20 @@ process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { getPool, ensureSchema, resetAll, waitForDb, close } = require('../src/db');
+const { getPool, resetAll, waitForDb, close } = require('../src/db');
+const { setupIsolatedDb, teardownIsolatedDb } = require('./helper');
 const { seed } = require('../src/seed');
 const store = require('../src/data/store');
 const scheduler = require('../src/data/quota-scheduler');
 
-test.before(async () => { await waitForDb(); await ensureSchema(); getPool(); });
+let dbName = null;
+test.before(async () => {
+  await waitForDb();
+  dbName = await setupIsolatedDb();
+  getPool();
+});
 test.beforeEach(async () => { await resetAll(); await seed(); });
-test.after(async () => { await close(); });
+test.after(async () => { await close(); if (dbName) await teardownIsolatedDb(dbName); });
 
 /* ---------------- 辅助：快速取测试上下文 ---------------- */
 async function ctx() {

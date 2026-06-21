@@ -23,6 +23,22 @@ const errors = {
   RESERVATION_NOT_FOUND: 'RESERVATION_NOT_FOUND',
 };
 
+/* 错误码 -> HTTP 状态映射。app.js 全局错误处理器识别 err.statusCode，
+   路由层只需 next(e) 即可自动返回正确状态码。 */
+const STATUS_BY_CODE = {
+  SLOT_NOT_FOUND: 404,
+  RESERVATION_NOT_FOUND: 404,
+  ORDER_NOT_FOUND: 404,
+  MEAL_NOT_FOUND: 400,
+  SLOT_INACTIVE: 409,
+  SLOT_FULL: 409,
+  ALREADY_RESERVED: 409,
+  MEAL_UNAVAILABLE: 409,
+  ORDER_SERVED: 409,
+  VERSION_CONFLICT: 409,
+  INVALID_CAPACITY: 400,
+};
+
 /* ------------------------------ 工具 ------------------------------ */
 
 async function lockSlot(conn, slotId) {
@@ -41,6 +57,7 @@ class SlotError extends Error {
     super(message);
     this.code = code;
     this.name = 'SlotError';
+    this.statusCode = STATUS_BY_CODE[code] || 409;
   }
 }
 

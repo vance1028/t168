@@ -6,15 +6,21 @@ const test = require('node:test');
 const assert = require('node:assert');
 const request = require('supertest');
 
-const { getPool, ensureSchema, resetAll, waitForDb, close } = require('../src/db');
+const { getPool, resetAll, waitForDb, close } = require('../src/db');
+const { setupIsolatedDb, teardownIsolatedDb } = require('./helper');
 const { seed } = require('../src/seed');
 const { createApp } = require('../src/app');
 
 const app = createApp();
+let dbName = null;
 
-test.before(async () => { await waitForDb(); await ensureSchema(); getPool(); });
+test.before(async () => {
+  await waitForDb();
+  dbName = await setupIsolatedDb();
+  getPool();
+});
 test.beforeEach(async () => { await resetAll(); await seed(); });
-test.after(async () => { await close(); });
+test.after(async () => { await close(); if (dbName) await teardownIsolatedDb(dbName); });
 
 async function loginAs(u, p) {
   const res = await request(app).post('/api/auth/login').send({ username: u, password: p });

@@ -7,6 +7,19 @@ const scheduler = require('./quota-scheduler');
 /** 数据仓储层：SQL 集中此处，路由层只调用这些 async 方法，对外返回 camelCase。 */
 
 /* ----------------------------- 映射 ----------------------------- */
+/* mysql2 默认把 DATE 列读成 JS Date 对象（带本地时区），经 JSON 序列化会变成
+   带时区的 ISO 串，客户端无法直接回传给 DATE 列。这里统一格式化为 YYYY-MM-DD。 */
+function toDateStr(v) {
+  if (v === null || v === undefined) return v;
+  if (v instanceof Date) {
+    const y = v.getFullYear();
+    const m = String(v.getMonth() + 1).padStart(2, '0');
+    const d = String(v.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  const s = String(v);
+  return s.length >= 10 ? s.slice(0, 10) : s;
+}
 function mapUser(r) {
   if (!r) return null;
   return { id: r.id, username: r.username, name: r.name, role: r.role, status: r.status, createdAt: r.created_at };
@@ -22,7 +35,7 @@ function mapElder(r) {
 }
 function mapMeal(r) {
   if (!r) return null;
-  return { id: r.id, canteenId: r.canteen_id, serveDate: r.serve_date, mealType: r.meal_type, dishName: r.dish_name, priceCents: r.price_cents, status: r.status, createdAt: r.created_at, updatedAt: r.updated_at };
+  return { id: r.id, canteenId: r.canteen_id, serveDate: toDateStr(r.serve_date), mealType: r.meal_type, dishName: r.dish_name, priceCents: r.price_cents, status: r.status, createdAt: r.created_at, updatedAt: r.updated_at };
 }
 function mapOrder(r) {
   if (!r) return null;
@@ -30,7 +43,7 @@ function mapOrder(r) {
 }
 function mapTimeSlot(r) {
   if (!r) return null;
-  return { id: r.id, canteenId: r.canteen_id, serveDate: r.serve_date, mealType: r.meal_type, startTime: r.start_time, endTime: r.end_time, capacity: r.capacity, used: r.used, version: r.version, status: r.status, createdAt: r.created_at, updatedAt: r.updated_at };
+  return { id: r.id, canteenId: r.canteen_id, serveDate: toDateStr(r.serve_date), mealType: r.meal_type, startTime: r.start_time, endTime: r.end_time, capacity: r.capacity, used: r.used, version: r.version, status: r.status, createdAt: r.created_at, updatedAt: r.updated_at };
 }
 function mapReservation(r) {
   if (!r) return null;
