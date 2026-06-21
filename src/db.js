@@ -8,7 +8,7 @@ const mysql = require('mysql2/promise');
 
 const DB_CONFIG = {
   host: process.env.DB_HOST || '127.0.0.1',
-  port: Number(process.env.DB_PORT) || 13377,
+  port: Number(process.env.DB_PORT) || 13380,
   user: process.env.DB_USER || 'care',
   password: process.env.DB_PASSWORD || 'carepass',
   database: process.env.DB_NAME || 'eldercare',
@@ -39,7 +39,7 @@ async function resetAll() {
   const conn = await getPool().getConnection();
   try {
     await conn.query('SET FOREIGN_KEY_CHECKS = 0');
-    for (const t of ['orders', 'meals', 'elders', 'canteens', 'users']) {
+    for (const t of ['reservations', 'time_slots', 'orders', 'meals', 'elders', 'canteens', 'users']) {
       await conn.query(`TRUNCATE TABLE ${t}`);
     }
     await conn.query('SET FOREIGN_KEY_CHECKS = 1');
